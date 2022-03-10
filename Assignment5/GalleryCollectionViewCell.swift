@@ -29,7 +29,7 @@ class GalleryCollectionViewCell: UICollectionViewCell {
 
 
     @IBOutlet weak var imageView: UIImageView!
-
+    
     private func fetchImage(){
         if let url = imageURL{
             DispatchQueue.global(qos: .userInitiated).async {

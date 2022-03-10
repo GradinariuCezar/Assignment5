@@ -9,11 +9,12 @@ import UIKit
 class GalleryCollectionViewController: UICollectionViewController, UICollectionViewDragDelegate, UICollectionViewDropDelegate,
     UICollectionViewDelegateFlowLayout {
 
-//    struct gallImage {
-//        var image : UIImage
-//        var aspectRatio: Double
-//    }
-    private var gallImageURL = [URL](){
+
+    struct gallImage {
+        var imageURL : URL
+        var aspectRatio: Double
+    }
+    private var gallImageURL = [gallImage](){
         didSet{
             gallCollectionView.reloadData()
             print(gallImageURL.count)
@@ -33,7 +34,19 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
                   gallCollectionView.delegate = self
                   gallCollectionView.dropDelegate = self
                   gallCollectionView.dragDelegate = self
+            gallCollectionView.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(scales(_:))))
                }
+    }
+
+    @objc private func scales(_ recognizer: UIPinchGestureRecognizer){
+        switch recognizer.state {
+                case .changed, .ended:
+                        self.aspectRatio *= recognizer.scale
+                        recognizer.scale = 1.0
+                flowLayout?.invalidateLayout()
+                default:
+                    break
+                }
     }
 //    @IBOutlet weak var gallCollectionView: UICollectionView!{
 //        didSet{
@@ -69,7 +82,7 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
         ///
     func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
            // Session must provide an attributed string
-        return session.canLoadObjects(ofClass: NSURL.self)
+        return session.canLoadObjects(ofClass: NSURL.self) && session.canLoadObjects(ofClass: UIImage.self)
        }
 
 
@@ -78,6 +91,7 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
        ///
     ///
     ///
+    var aspectRatio = 1.0
     func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
         let destinationIndexPath = coordinator.destinationIndexPath ?? IndexPath(item: 0, section: 0)
         for item in coordinator.items {
@@ -87,7 +101,7 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
                     collectionView.performBatchUpdates({ // neccessary if we do multiple adjustments to table or collection view
                         // it will do them all as one operation:
                         gallImageURL.remove(at: sourceIndexPath.item)
-                        gallImageURL.insert(url, at: destinationIndexPath.item)
+                        gallImageURL.insert(gallImage(imageURL:url,aspectRatio: 1.0), at: destinationIndexPath.item)
                         collectionView.deleteItems(at: [sourceIndexPath])
                         collectionView.insertItems(at: [destinationIndexPath])
                     })
@@ -96,15 +110,26 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
             }
             // This is NOT a local drag (drop comes from somewhere else)
             else {
+
                 let placeholderContext = coordinator.drop(
                     item.dragItem,
                     to: UICollectionViewDropPlaceholder(insertionIndexPath: destinationIndexPath, reuseIdentifier: "SpinCell"))
+
+                item.dragItem.itemProvider.loadObject(ofClass: UIImage.self) { (provider, error) in
+                    DispatchQueue.main.async {
+                        if let image = provider as? UIImage {
+                            self.aspectRatio = Double(image.size.width/image.size.height)
+                            print("ASPECT RATIO: \(image.size.width/image.size.height)")
+                        }
+                    }
+                }
+
                 item.dragItem.itemProvider.loadObject(ofClass: NSURL.self) { (provider, error) in
                     DispatchQueue.main.async {
                         if let url = provider as? URL {
                             placeholderContext.commitInsertion(dataSourceUpdates: { insertionIndexPath in
                                 //din utilities
-                                self.gallImageURL.insert(url.imageURL, at: insertionIndexPath.item)
+                                self.gallImageURL.insert(gallImage(imageURL:url.imageURL,aspectRatio: self.aspectRatio), at: insertionIndexPath.item)
                                 //AICI!!!
 
                             })
@@ -134,7 +159,7 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "GalleryCell", for: indexPath)
         if let gallCell = cell as? GalleryCollectionViewCell {
-            gallCell.imageURL = gallImageURL[indexPath.item]
+            gallCell.imageURL = gallImageURL[indexPath.item].imageURL
         }
         // Configure the cell
         return cell
@@ -142,7 +167,7 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
 
     // Size for item at indexPath
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        print("MARIME : INDEXPATH: \(indexPath)")
+        //print("MARIME : INDEXPATH: \(indexPath)")
 //        var height = CGFloat()
 //        var width = CGFloat()
 //
@@ -152,15 +177,22 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
 //        }
 
         //return CGSize(width: width, height: height)
-        return CGSize(width: 400,height: 200)
+        print("aspectRatio: \(self.aspectRatio)")
+        return CGSize(width: 400,height: 400*self.aspectRatio)
        }
-
+    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+        let isSelf = (session.localDragSession?.localContext as? UICollectionView) == collectionView
+        return UICollectionViewDropProposal(operation: isSelf ? .move : .copy, intent: .insertAtDestinationIndexPath)
+    }
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
         // Drag must be URL and UIImage. (Using NSURL because this is an objective-c api. Although we
         // have automatic-bridging between objective-c's NSURL and swift's URL, we must use NSURL.self
         // because we're passing the specific class to `canLoadObjects`)
-        return session.canLoadObjects(ofClass: UIImage.self) && session.canLoadObjects(ofClass: NSURL.self)
+        return session.canLoadObjects(ofClass: UIImage.self) || session.canLoadObjects(ofClass: NSURL.self)
     }
+    var flowLayout: UICollectionViewFlowLayout? {
+              return collectionView?.collectionViewLayout as? UICollectionViewFlowLayout
+   }
 
 }
 

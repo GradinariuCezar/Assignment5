@@ -9,24 +9,49 @@ import UIKit
 
 class ImageGalleryTableViewController: UITableViewController {
 
-    var emojiArtDocuments = ["One", "Two", "Three"]
 
+    var currentGalleries = ["One", "Two", "Three"]
+    var deletedGalleries = [String]()
+    var Galleries: [[String]]{
+        return [currentGalleries,deletedGalleries]
+    }
     // MARK: - Table view data source methods
 
     override func numberOfSections(in tableView: UITableView) -> Int {
 
-        return 1 // original: return 0
+        return 2
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return emojiArtDocuments.count
+        return Galleries[section].count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DocumentCell", for: indexPath)
 
-        cell.textLabel?.text = emojiArtDocuments[indexPath.row]
+        cell.textLabel?.text = Galleries[indexPath.section][indexPath.row]
         return cell
+    }
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 1 {
+            return "Recently Deleted"
+        }
+        return "Galleries"
+    }
+    override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        if indexPath.section == 1{
+            let contextItem = UIContextualAction(style: .normal, title: "undelete"){
+                (contextualAction,view,boolValue) in
+                let undeleteItem = self.deletedGalleries.remove(at: indexPath.row)
+                self.currentGalleries.append(undeleteItem)
+                boolValue(true)
+                self.tableView.reloadData()
+            }
+            return UISwipeActionsConfiguration(actions: [contextItem])
+        }
+        else{
+            return nil
+        }
     }
 
 //    @IBAction func newEmojiArt(_ sender: UIBarButtonItem) {
@@ -53,11 +78,11 @@ class ImageGalleryTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from your data source
-            emojiArtDocuments.remove(at: indexPath.row)  // in final project, we will mess this up :))
+            let remove = currentGalleries.remove(at: indexPath.row)  // in final project, we will mess this up :))
             tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+            deletedGalleries.append(remove)
         }
+        tableView.reloadData()
     }
 
 
