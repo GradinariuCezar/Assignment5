@@ -97,7 +97,10 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
         for item in coordinator.items {
             // Is this a local drag?
             if let sourceIndexPath = item.sourceIndexPath {
+                print("nooo")
+                print("\(type(of: item.dragItem.localObject))")
                 if let url = item.dragItem.localObject as? URL {
+                    print("yaaas")
                     collectionView.performBatchUpdates({ // neccessary if we do multiple adjustments to table or collection view
                         // it will do them all as one operation:
                         gallImageURL.remove(at: sourceIndexPath.item)
@@ -184,17 +187,28 @@ class GalleryCollectionViewController: UICollectionViewController, UICollectionV
         let isSelf = (session.localDragSession?.localContext as? UICollectionView) == collectionView
         return UICollectionViewDropProposal(operation: isSelf ? .move : .copy, intent: .insertAtDestinationIndexPath)
     }
-    func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        // Drag must be URL and UIImage. (Using NSURL because this is an objective-c api. Although we
-        // have automatic-bridging between objective-c's NSURL and swift's URL, we must use NSURL.self
-        // because we're passing the specific class to `canLoadObjects`)
-        return session.canLoadObjects(ofClass: UIImage.self) || session.canLoadObjects(ofClass: NSURL.self)
-    }
     var flowLayout: UICollectionViewFlowLayout? {
               return collectionView?.collectionViewLayout as? UICollectionViewFlowLayout
    }
+    // In a storyboard-based application, you will often want to do a little
+    // preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "DetailImage"{
 
+        // Destination must be an ImageViewController
+        guard let detailImageViewController = segue.destination.contents as? DetailImageViewController else {
+            return // expected a segue to ImageViewController class
+        }
+
+        // Setup destination's model (URL) and title
+        if let cell = sender as? GalleryCollectionViewCell{
+            detailImageViewController.imageURL = cell.imageURL
+        }
+    }
+    }
 }
+
+
 
 //extension GalleryCollectionViewController: UIDropInteractionDelegate {
 //    ///

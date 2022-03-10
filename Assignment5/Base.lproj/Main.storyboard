@@ -3,6 +3,7 @@
     <device id="ipad12_9rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -14,7 +15,7 @@
                 <splitViewController allowDoubleColumnStyle="YES" id="6Si-Kh-DC5" sceneMemberID="viewController">
                     <connections>
                         <segue destination="cen-q0-fuJ" kind="relationship" relationship="masterViewController" id="xS0-Q9-rpX"/>
-                        <segue destination="EH8-gQ-lJs" kind="relationship" relationship="detailViewController" id="GNv-av-eL9"/>
+                        <segue destination="VB0-I5-zdQ" kind="relationship" relationship="detailViewController" id="GNv-av-eL9"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fgj-U8-4q5" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -105,6 +106,7 @@
                                 </collectionViewCellContentView>
                                 <connections>
                                     <outlet property="imageView" destination="Aur-PF-ZKe" id="aBp-bN-6zx"/>
+                                    <segue destination="jQH-ev-AEb" kind="showDetail" identifier="DetailImage" id="wHD-nJ-8k8"/>
                                 </connections>
                             </collectionViewCell>
                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="SpinCell" id="qOo-Rl-qZu">
@@ -126,11 +128,62 @@
                             </collectionViewCell>
                         </cells>
                     </collectionView>
+                    <navigationItem key="navigationItem" id="lxk-qq-54s"/>
                     <connections>
                         <outlet property="gallCollectionView" destination="qpv-Wd-QJ6" id="cto-RC-EyQ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fg7-G2-MNf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1357.03125" y="3.9531478770131767"/>
+        </scene>
+        <!--Detail Image View Controller-->
+        <scene sceneID="Txy-Ev-jCx">
+            <objects>
+                <viewController id="jQH-ev-AEb" customClass="DetailImageViewController" customModule="Assignment5" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="cPb-YU-0rR">
+                        <rect key="frame" x="0.0" y="0.0" width="1024" height="1366"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ne7-3D-9nD">
+                                <rect key="frame" x="0.0" y="74" width="1024" height="1272"/>
+                                <viewLayoutGuide key="contentLayoutGuide" id="rpq-ZQ-eHp"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="Oha-gu-QUR"/>
+                            </scrollView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="eqv-2A-SCF"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="eqv-2A-SCF" firstAttribute="bottom" secondItem="ne7-3D-9nD" secondAttribute="bottom" constant="8" id="531-4n-XY9"/>
+                            <constraint firstItem="eqv-2A-SCF" firstAttribute="trailing" secondItem="ne7-3D-9nD" secondAttribute="trailing" constant="8" id="dbj-2T-LHb"/>
+                            <constraint firstItem="ne7-3D-9nD" firstAttribute="top" secondItem="eqv-2A-SCF" secondAttribute="top" constant="8" id="q4D-WY-3sx"/>
+                            <constraint firstItem="ne7-3D-9nD" firstAttribute="leading" secondItem="eqv-2A-SCF" secondAttribute="leading" constant="8" id="y0Y-4c-SAJ"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="zz1-tO-ZWe"/>
+                    <connections>
+                        <outlet property="scrollView" destination="ne7-3D-9nD" id="NUU-9G-Tfh"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="RZB-oh-8Ne" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2377.734375" y="13.616398243045387"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="Fh6-y3-NNR">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="VB0-I5-zdQ" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="114-CD-kS0">
+                        <rect key="frame" x="0.0" y="24" width="1024" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="EH8-gQ-lJs" kind="relationship" relationship="rootViewController" id="IdE-YT-wtv"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="oXZ-XI-I8W" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="631.640625" y="3.9531478770131767"/>
         </scene>

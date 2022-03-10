@@ -24,29 +24,38 @@ class GalleryCollectionViewCell: UICollectionViewCell {
             imageView.image = newValue
         }
     }
-    var width : CGFloat?
-    var height : CGFloat?
+
 
 
     @IBOutlet weak var imageView: UIImageView!
     
     private func fetchImage(){
+        print("am intrat")
         if let url = imageURL{
             DispatchQueue.global(qos: .userInitiated).async {
                 [weak self] in
-                let urlContents = try? Data(contentsOf: url)
-                DispatchQueue.main.async { [self] in
-                    if let imageData = urlContents {
+                if let urlContents = try? Data(contentsOf: url){
+                    let imageData = urlContents
                         print("AICI\(imageData)")
                         self?.image = UIImage(data: imageData)
-                        self?.width = self?.image!.size.width
-                        self?.height = self?.image!.size.height
-                    }
+
+
             }
+                else{
+                    self?.image = "😥".toImage()                }
             }
 
 
 
     }
 }
+}
+
+extension String {
+    func toImage() -> UIImage? {
+        if let data = Data(base64Encoded: self, options: .ignoreUnknownCharacters){
+            return UIImage(data: data)
+        }
+        return nil
+    }
 }
